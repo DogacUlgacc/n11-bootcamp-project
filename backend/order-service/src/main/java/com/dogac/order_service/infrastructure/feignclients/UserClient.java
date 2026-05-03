@@ -1,0 +1,19 @@
+package com.dogac.order_service.infrastructure.feignclients;
+
+import java.util.UUID;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.dogac.order_service.application.feignDto.UserDto;
+
+@FeignClient(name = "USER-SERVICE")
+public interface UserClient {
+
+    @GetMapping("/api/v1/users/{id}")
+    UserDto getUserById(@PathVariable("id") UUID id);
+
+    @GetMapping("/api/v1/users/by-external-id/{externalId}")
+    UserDto getUserByExternalId(@PathVariable("externalId") String externalId);
+}

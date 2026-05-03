@@ -1,0 +1,151 @@
+services:
+  postgres:
+    image: postgres:13
+    restart: always
+    container_name: keycloak-postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password_for_database
+    ports:
+      - "5432:5432"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    restart: always
+    container_name: keycloak
+    environment:
+      # Admin credentials for the Keycloak instance
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: password
+      # Database configuration
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password_for_database
+      # Other useful settings
+      KC_HOSTNAME: localhost
+      KC_HEALTH_ENABLED: "true"
+      KC_LOG_LEVEL: INFO
+    ports:
+      - "8080:8080"
+    command: ["start-dev"]
+    depends_on:
+      - postgres
+  productssv_db:
+    container_name: productssv_db
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: product_db
+      POSTGRES_USER: product_db
+      POSTGRES_PASSWORD: product-password
+    ports:
+      - "5436:5432"
+    volumes:
+      - productdb_vol:/var/lib/postgresql/data
+
+  userssv_db:
+    container_name: userssv_db
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: user_db
+      POSTGRES_PASSWORD: user-password
+    ports:
+      - "5437:5432"
+    volumes:
+      - userdb_vol:/var/lib/postgresql/data
+  kafka:
+    image: apache/kafka:3.8.0
+    restart: unless-stopped
+    ports:
+      - "9092:9092" # container içi (PLAINTEXT) - diğer container'lar için
+      - "9094:9094" # host'tan erişim (EXTERNAL)
+    environment:
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: "1"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094"
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_NUM_PARTITIONS: "3"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+
+      CLUSTER_ID: "5L6g3nShT-eMCtK--X86sw"
+      KAFKA_CLUSTER_ID: "5L6g3nShT-eMCtK--X86sw"
+
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - kafkanet
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    ports:
+      - "8079:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "local"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:9092"
+    networks:
+      - kafkanet
+  cartssv_db:
+    container_name: cartssv_db
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: cart_db
+      POSTGRES_USER: cart_db
+      POSTGRES_PASSWORD: cart-password
+    ports:
+      - "5438:5432"
+    volumes:
+      - cartdb_vol:/var/lib/postgresql/data
+  orderssv_db:
+    container_name: orderssv_db
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: order_db
+      POSTGRES_PASSWORD: order-password
+    ports:
+      - "5439:5432"
+    volumes:
+      - orderdb_vol:/var/lib/postgresql/data
+  paymentssv_db:
+    container_name: paymentssv_db
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_USER: payment_db
+      POSTGRES_PASSWORD: payment-password
+    ports:
+      - "5440:5432"
+    volumes:
+      - paymentdb_vol:/var/lib/postgresql/data
+volumes:
+  productdb_vol:
+  userdb_vol:
+  paymentdb_vol:
+  cartdb_vol:
+  orderdb_vol:
+  kafka-data:
+  postgres_data:
+networks:
+  kafkanet:
