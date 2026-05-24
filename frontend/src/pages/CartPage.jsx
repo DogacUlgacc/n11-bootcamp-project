@@ -10,10 +10,11 @@ import { checkoutOrder } from "../api/orderApi";
 import { waitForPaymentByOrderId } from "../api/paymentApi";
 import { getApiErrorMessage, getProductById } from "../api/productApi";
 
-const userId = "07ed7f7a-1340-431a-a564-f1932498dc99";
-
+const userId = localStorage.getItem("userId");
 function CartPage() {
   const navigate = useNavigate();
+  // Sepet sadece cart verisini degil, urun detaylarini da gosteriyor.
+  // Bu yuzden productMap ayrica tutulur: item.productId -> product detayi.
   const [cart, setCart] = useState(null);
   const [productMap, setProductMap] = useState({});
   const [loading, setLoading] = useState(true);
@@ -57,6 +58,8 @@ function CartPage() {
   useEffect(() => {
     let ignore = false;
 
+    // Bos dependency array: CartPage ekrana ilk geldiginde bir kez sepet yuklenir.
+    // Sepetteki adet/silme islemleri kendi handler'lari icinde state'i gunceller.
     const run = async () => {
       try {
         setLoading(true);
@@ -89,6 +92,8 @@ function CartPage() {
   }, []);
 
   const itemCount = useMemo(() => {
+    // itemCount cart state'inden turetilen degerdir; ayri state olarak tutulmaz.
+    // Boylece cart degistiginde otomatik yeniden hesaplanir.
     return (cart?.items || []).reduce(
       (total, item) => total + item.quantity,
       0,
@@ -150,6 +155,8 @@ function CartPage() {
       return;
     }
 
+    // Checkout iki adimli: once order olusur, sonra payment kaydi async olarak
+    // aranir. Payment bulununca navigate ile odeme sayfasina gecilir.
     try {
       setCheckingOut(true);
       setError("");

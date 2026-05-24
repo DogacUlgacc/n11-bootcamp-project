@@ -4,6 +4,8 @@ import { addToCart } from "../api/cartApi";
 import { getApiErrorMessage, getProductById } from "../api/productApi";
 
 function ProductDetailPage() {
+  // URL'deki :id parametresi hangi urunun detayinin cekilecegini belirler.
+  // id degisirse useEffect yeniden calisir ve yeni urun getirilir.
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -12,6 +14,8 @@ function ProductDetailPage() {
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
+    // Bu effect sadece successMessage degistiginde calisir; mesaj varsa
+    // gecici bir bildirim gibi davranir ve sonra temizlenir.
     if (!successMessage) {
       return undefined;
     }
@@ -28,6 +32,8 @@ function ProductDetailPage() {
   useEffect(() => {
     let ignore = false;
 
+    // API cagrisi render sirasinda degil effect icinde yapilir; boylece render
+    // saf kalir, veri gelince setProduct ile ikinci render tetiklenir.
     const fetchProduct = async () => {
       try {
         setLoading(true);

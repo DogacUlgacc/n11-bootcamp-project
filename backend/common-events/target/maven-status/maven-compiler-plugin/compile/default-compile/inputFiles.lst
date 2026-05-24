@@ -1,8 +1,9 @@
-C:\Users\dogac\Projects\n11\n11-demo-bootcamp\n11-demo-bootcamp\common-events\src\main\java\com\dogac\common_events\enums\Currency.java
-C:\Users\dogac\Projects\n11\n11-demo-bootcamp\n11-demo-bootcamp\common-events\src\main\java\com\dogac\common_events\event\CartItemAddedEvent.java
-C:\Users\dogac\Projects\n11\n11-demo-bootcamp\n11-demo-bootcamp\common-events\src\main\java\com\dogac\common_events\event\CartItemQuantityUpdatedEvent.java
-C:\Users\dogac\Projects\n11\n11-demo-bootcamp\n11-demo-bootcamp\common-events\src\main\java\com\dogac\common_events\event\CartItemRemovedEvent.java
-C:\Users\dogac\Projects\n11\n11-demo-bootcamp\n11-demo-bootcamp\common-events\src\main\java\com\dogac\common_events\event\OrderCreatedEvent.java
-C:\Users\dogac\Projects\n11\n11-demo-bootcamp\n11-demo-bootcamp\common-events\src\main\java\com\dogac\common_events\event\PaymentFailedEvent.java
-C:\Users\dogac\Projects\n11\n11-demo-bootcamp\n11-demo-bootcamp\common-events\src\main\java\com\dogac\common_events\event\PaymentSucceededEvent.java
-C:\Users\dogac\Projects\n11\n11-demo-bootcamp\n11-demo-bootcamp\common-events\src\main\java\com\dogac\Main.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\common_events\enums\Currency.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\common_events\event\CartItemAddedEvent.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\common_events\event\CartItemQuantityUpdatedEvent.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\common_events\event\CartItemRemovedEvent.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\common_events\event\OrderCreatedEvent.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\common_events\event\PaymentFailedEvent.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\common_events\event\PaymentSucceededEvent.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\common_events\event\UserRegisteredEvent.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\Main.java

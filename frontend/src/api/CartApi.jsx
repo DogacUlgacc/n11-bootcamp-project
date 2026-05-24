@@ -1,7 +1,7 @@
-import axiosInstance from "./axiosInstance";
 import keycloak from "../keycloack";
+import axiosInstance from "./axiosInstance";
 
-const CART_ID_STORAGE_KEY = "3d5cefed-2835-471e-81b0-2acb6aed28ce";
+const CART_ID_STORAGE_KEY = "cartId";
 
 const redirectToLogin = () => {
   const from = `${window.location.pathname}${window.location.search}`;
@@ -27,6 +27,21 @@ export const getStoredCartId = () => {
   return localStorage.getItem(CART_ID_STORAGE_KEY);
 };
 
+export const getCartByUserId = async (userId) => {
+  const authConfig = await getAuthConfig();
+
+  if (!authConfig) {
+    return null;
+  }
+
+  const response = await axiosInstance.get(
+    `/api/v1/carts/user/${userId}`,
+    authConfig,
+  );
+
+  return response.data;
+};
+
 export const storeCartId = (cartId) => {
   if (cartId) {
     localStorage.setItem(CART_ID_STORAGE_KEY, cartId);
@@ -37,36 +52,8 @@ export const clearStoredCartId = () => {
   localStorage.removeItem(CART_ID_STORAGE_KEY);
 };
 
-export const createCart = async (userId, currency = "TRY") => {
-  const authConfig = await getAuthConfig();
-
-  if (!authConfig) {
-    return null;
-  }
-
-  const response = await axiosInstance.post(
-    "/api/v1/carts",
-    {
-      userId,
-      currency,
-    },
-    authConfig,
-  );
-
-  storeCartId(response.data?.cartId);
-
-  return response.data;
-};
-
-export const ensureCart = async (userId, currency = "TRY") => {
-  const storedCartId = getStoredCartId();
-
-  if (storedCartId) {
-    return storedCartId;
-  }
-
-  const cart = await createCart(userId, currency);
-
+export const ensureCart = async (userId) => {
+  const cart = await getCartByUserId(userId);
   return cart?.cartId;
 };
 
@@ -85,25 +72,16 @@ export const getCartById = async (cartId) => {
   return response.data;
 };
 
-export const getCurrentCart = async (userId, currency = "TRY") => {
-  const cartId = await ensureCart(userId, currency);
-
-  return getCartById(cartId);
+export const getCurrentCart = async (userId) => {
+  return getCartByUserId(userId);
 };
 
-export const addProductToCart = async (
-  userId,
-  productId,
-  quantity = 1,
-  currency = "TRY",
-) => {
+export const addProductToCart = async (userId, productId, quantity = 1) => {
   const authConfig = await getAuthConfig();
 
   if (!authConfig) {
     return null;
   }
-
-  await ensureCart(userId, currency);
 
   const response = await axiosInstance.post(
     "/api/v1/carts/items",

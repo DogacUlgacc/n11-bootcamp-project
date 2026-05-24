@@ -35,6 +35,7 @@ public class User implements AggregateRoot<UserId> {
 
     private User(
             UserId id,
+            ExternalId externalId,
             FullName fullName,
             Email email,
             PhoneNumber phoneNumber,
@@ -46,6 +47,7 @@ public class User implements AggregateRoot<UserId> {
         this.id = Objects.requireNonNull(id);
         this.fullName = Objects.requireNonNull(fullName);
         this.email = Objects.requireNonNull(email);
+        this.externalId = externalId;
         this.phoneNumber = phoneNumber;
         this.userType = Objects.requireNonNull(userType);
         this.status = Objects.requireNonNull(status);
@@ -54,6 +56,7 @@ public class User implements AggregateRoot<UserId> {
         this.updatedAt = updatedAt;
     }
 
+    /* admin/internal user create, externalId null olabilir */
     public static User create(
 
             FullName fullName,
@@ -64,6 +67,30 @@ public class User implements AggregateRoot<UserId> {
 
         return new User(
                 UserId.generate(),
+                null,
+                Objects.requireNonNull(fullName),
+                Objects.requireNonNull(email),
+                Objects.requireNonNull(phoneNumber),
+                Objects.requireNonNull(userType),
+                UserStatus.ACTIVE,
+                new ArrayList<>(),
+                now,
+                now);
+    }
+
+    /* müşteri kayıt, externalId zorunlu */
+    public static User register(
+            ExternalId externalId,
+            FullName fullName,
+            Email email,
+            PhoneNumber phoneNumber,
+            UserType userType) {
+
+        Instant now = Instant.now();
+
+        return new User(
+                UserId.generate(),
+                Objects.requireNonNull(externalId),
                 Objects.requireNonNull(fullName),
                 Objects.requireNonNull(email),
                 Objects.requireNonNull(phoneNumber),
@@ -87,6 +114,7 @@ public class User implements AggregateRoot<UserId> {
             Instant updatedAt) {
         User user = new User(
                 id,
+                externalId,
                 fullName,
                 email,
                 phoneNumber,

@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import { getApiErrorMessage } from "../api/productApi";
 import { getUserById } from "../api/userApi";
 
-const userId = "07ed7f7a-1340-431a-a564-f1932498dc99";
-
 function AccountPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,10 +11,19 @@ function AccountPage() {
   useEffect(() => {
     let ignore = false;
 
+    // Hesap sayfasi userId bilgisini localStorage'dan okur. Bu bilgi App.jsx'te
+    // login sonrasi backend kullanicisi bulununca yazilir.
     const run = async () => {
       try {
         setLoading(true);
         setError("");
+
+        const userId = localStorage.getItem("userId");
+
+        if (!userId) {
+          setError("Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
+          return;
+        }
 
         const data = await getUserById(userId);
 
@@ -71,7 +78,9 @@ function AccountPage() {
             </div>
           </div>
 
-          {loading && <p className="info-message">Kullanıcı bilgileri yükleniyor...</p>}
+          {loading && (
+            <p className="info-message">Kullanıcı bilgileri yükleniyor...</p>
+          )}
           {error && <p className="error-message">{error}</p>}
 
           {!loading && user && (

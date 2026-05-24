@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   createProduct,
   deleteProduct,
@@ -7,18 +6,9 @@ import {
   getProducts,
   updateProduct,
 } from "../api/productApi";
+import Header from "../components/Header";
 import ProductCard from "../components/ProductCard";
-
-const categories = [
-  "Elektronik",
-  "Moda",
-  "Ev & Yaşam",
-  "Anne & Bebek",
-  "Kozmetik",
-  "Spor",
-  "Süpermarket",
-  "Otomotiv",
-];
+import keycloak from "../keycloack";
 
 const emptyForm = {
   productName: "",
@@ -29,6 +19,8 @@ const emptyForm = {
 };
 
 function ProductListPage() {
+  // Ekranda degisebilen her bilgi state'tir: urunler, arama metni,
+  // sayfalama/siralama secimleri, loading ve form verileri UI'i yeniden cizer.
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(0);
@@ -43,6 +35,21 @@ function ProductListPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [formValues, setFormValues] = useState(emptyForm);
   const [editingProduct, setEditingProduct] = useState(null);
+  const token = localStorage.getItem("token");
+  const isAuthenticated = !!token;
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userId");
+
+    if (keycloak.authenticated) {
+      keycloak.logout({ redirectUri: window.location.origin + "/" });
+      return;
+    }
+
+    window.location.href = "/";
+  };
 
   const fetchProducts = async () => {
     try {
@@ -67,6 +74,8 @@ function ProductListPage() {
   useEffect(() => {
     let ignore = false;
 
+    // Sayfa ilk render oldugunda ve page/size/sortBy/direction degistiginde
+    // backend'den yeni urun listesi cekilir. Dependency array bu yuzden dolu.
     const run = async () => {
       try {
         setLoading(true);
@@ -101,6 +110,8 @@ function ProductListPage() {
   }, [page, size, sortBy, direction]);
 
   const visibleProducts = useMemo(() => {
+    // Arama backend'e gitmeden, mevcut sayfadaki products state'i uzerinden
+    // hesaplanir. useMemo, products veya searchTerm degismedikce tekrar filtrelemez.
     const normalizedSearch = searchTerm.trim().toLocaleLowerCase("tr-TR");
 
     if (!normalizedSearch) {
@@ -170,6 +181,8 @@ function ProductListPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    // Form submit oldugunda once client-side validation yapilir; sonra create/update
+    // API cagrisi tamamlaninca liste tekrar cekilerek UI backend ile eslenir.
     const validationMessage = validateForm();
 
     if (validationMessage) {
@@ -245,41 +258,12 @@ function ProductListPage() {
 
   return (
     <div className="app">
-      <header className="site-header">
-        <div className="header-top">
-          <a className="logo" href="/" aria-label="n11 ana sayfa">
-            n11
-          </a>
-
-          <label className="search-bar">
-            <span>Ürün ara</span>
-            <input
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Marka, ürün veya kategori ara"
-              type="search"
-            />
-            <button type="button">Ara</button>
-          </label>
-
-          <div className="header-actions">
-            <Link to="/account" className="ghost-button">
-              Hesabım
-            </Link>
-            <Link to="/cart" className="cart-button">
-              Sepetim
-            </Link>
-          </div>
-        </div>
-
-        <nav className="category-menu" aria-label="Kategori menüsü">
-          {categories.map((category) => (
-            <a key={category} href="/">
-              {category}
-            </a>
-          ))}
-        </nav>
-      </header>
+      <Header
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        isAuthenticated={isAuthenticated}
+        onLogout={handleLogout}
+      />
 
       <main className="container">
         <section className="hero-banner">

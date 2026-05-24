@@ -25,6 +25,7 @@ import com.dogac.cart_service.application.dto.CreatedCartResponse;
 import com.dogac.cart_service.application.dto.UpdateQuantityRequest;
 import com.dogac.cart_service.application.dto.feignDto.UserDto;
 import com.dogac.cart_service.application.queries.GetCartByIdQuery;
+import com.dogac.cart_service.application.queries.GetCartByUserIdQuery;
 import com.dogac.cart_service.infrastructure.feignclient.UserClient;
 
 import jakarta.validation.Valid;
@@ -44,18 +45,17 @@ public class CartController {
         this.userClient = userClient;
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<CartResponse> getCartByUserId(@PathVariable UUID userId) {
+        CartResponse response = queryBus.execute(new GetCartByUserIdQuery(userId));
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping
     public ResponseEntity<CreatedCartResponse> createCart(@RequestBody @Valid CreateCartCommand command) {
         CreatedCartResponse response = commandBus.send(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    // KEYCLOACK ÖNCESİ:
-    // @PostMapping("/items")
-    // public ResponseEntity<Void> addItem(@RequestBody AddItemToCartCommand
-    // command) {
-    // commandBus.send(command);
-    // return ResponseEntity.ok().build();
-    // }
 
     @PostMapping("/items")
     public ResponseEntity<Void> addItem(

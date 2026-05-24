@@ -1,5 +1,19 @@
 spring:
   application:
     name: user-service
+
   config:
     import: optional:configserver:http://localhost:8071
+
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+keycloak:
+  auth-server-url: http://localhost:8080
+  realm: n11-realm
+  admin-client-id: admin-cli
+  admin-username: admin
+  admin-password: password

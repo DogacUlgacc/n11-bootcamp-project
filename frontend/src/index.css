@@ -680,6 +680,133 @@ p {
   background: var(--color-primary-dark);
 }
 
+.register-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background:
+    linear-gradient(135deg, rgba(255, 222, 0, 0.18), transparent 34%),
+    linear-gradient(145deg, #f7f4fc 0%, #ffffff 48%, #f3f4f7 100%);
+}
+
+.register-shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  display: grid;
+  place-items: start center;
+  padding: 18px 0 72px;
+}
+
+.register-panel {
+  width: min(100%, 760px);
+  display: grid;
+  gap: 24px;
+  padding: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: 0 18px 44px rgba(32, 33, 36, 0.12);
+}
+
+.register-heading {
+  display: grid;
+  gap: 10px;
+}
+
+.register-heading h1 {
+  color: var(--color-ink);
+  font-size: 32px;
+  line-height: 1.15;
+}
+
+.register-heading p {
+  color: var(--color-muted);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.register-form {
+  display: grid;
+  gap: 22px;
+}
+
+.register-fieldset {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.register-fieldset legend {
+  padding: 0 8px;
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.register-field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.register-field-wide {
+  grid-column: 1 / -1;
+}
+
+.register-field span {
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.register-field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  outline: 0;
+}
+
+.register-field input::placeholder {
+  color: #9da1a8;
+}
+
+.register-field input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(93, 27, 191, 0.12);
+}
+
+.register-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.register-login-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-primary);
+  background: var(--color-surface);
+  font-weight: 900;
+}
+
+.register-login-link:hover {
+  border-color: var(--color-primary);
+  background: #f0eafa;
+}
+
 .detail-header {
   grid-template-columns: auto 1fr;
 }
@@ -1243,6 +1370,24 @@ p {
 
   .login-panel {
     padding: 22px;
+  }
+
+  .register-shell {
+    width: min(100% - 20px, 1120px);
+    padding-top: 8px;
+  }
+
+  .register-panel,
+  .register-fieldset {
+    padding: 18px;
+  }
+
+  .register-fieldset {
+    grid-template-columns: 1fr;
+  }
+
+  .register-heading h1 {
+    font-size: 30px;
   }
 
   .section-heading {

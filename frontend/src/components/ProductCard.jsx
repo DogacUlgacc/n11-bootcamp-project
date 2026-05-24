@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { addToCart } from "../api/cartApi";
 
-function ProductCard({ product }) {
+wfunction ProductCard({ product }) {
+  // ProductCard kendi kucuk UI durumunu kendisi tutar: sadece bu kartin
+  // "sepete ekleniyor" ve feedback mesaji parent listeyi ilgilendirmez.
   const [adding, setAdding] = useState(false);
   const [feedback, setFeedback] = useState(null);
 
@@ -16,6 +18,8 @@ function ProductCard({ product }) {
   const hasStock = Number(product.stockQuantity) > 0;
 
   useEffect(() => {
+    // Feedback mesaji gorundukten 3 saniye sonra otomatik kapanir.
+    // Cleanup, component unmount olursa bekleyen timer'in state guncellemesini engeller.
     if (!feedback) {
       return undefined;
     }

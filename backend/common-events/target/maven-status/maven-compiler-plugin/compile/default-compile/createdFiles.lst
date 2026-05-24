@@ -1,4 +1,9 @@
 com\dogac\common_events\enums\Currency.class
+com\dogac\common_events\event\UserRegisteredEvent.class
+com\dogac\common_events\event\OrderCreatedEvent.class
+com\dogac\common_events\event\PaymentFailedEvent.class
 com\dogac\Main.class
 com\dogac\common_events\event\CartItemAddedEvent.class
+com\dogac\common_events\event\CartItemQuantityUpdatedEvent.class
 com\dogac\common_events\event\CartItemRemovedEvent.class
+com\dogac\common_events\event\PaymentSucceededEvent.class

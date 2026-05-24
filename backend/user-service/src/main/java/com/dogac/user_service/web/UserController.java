@@ -19,8 +19,10 @@ import com.dogac.user_service.application.bus.CommandBus;
 import com.dogac.user_service.application.bus.QueryBus;
 import com.dogac.user_service.application.commands.CreateUserCommand;
 import com.dogac.user_service.application.commands.DeleteUserCommand;
+import com.dogac.user_service.application.commands.RegisterUserCommand;
 import com.dogac.user_service.application.commands.UpdateUserCommand;
 import com.dogac.user_service.application.dto.CreatedUserResponse;
+import com.dogac.user_service.application.dto.RegisteredUserResponse;
 import com.dogac.user_service.application.dto.UpdateUserRequest;
 import com.dogac.user_service.application.dto.UpdatedUserResponse;
 import com.dogac.user_service.application.dto.UserIdentityResponse;
@@ -56,6 +58,15 @@ public class UserController {
                 externalId != null ? externalId : command.externalId());
 
         CreatedUserResponse response = commandBus.send(commandWithExternalId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<RegisteredUserResponse> register(
+            @RequestBody @Valid RegisterUserCommand command) {
+
+        RegisteredUserResponse response = commandBus.send(command);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

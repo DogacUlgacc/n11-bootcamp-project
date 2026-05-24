@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import keycloak from "../keycloack";
 
 const getRedirectPath = (location) => {
@@ -24,16 +24,25 @@ const getRedirectPath = (location) => {
 
 function LoginPage() {
   const location = useLocation();
-  const navigate = useNavigate();
   const redirectPath = getRedirectPath(location);
 
   useEffect(() => {
+    // Kullanici zaten authenticate ise login ekraninda bekletilmez; token
+    // saklanir ve ana sayfaya donulur.
     if (keycloak.authenticated) {
-      navigate("/", { replace: true });
+      localStorage.setItem("token", keycloak.token);
+
+      if (keycloak.refreshToken) {
+        localStorage.setItem("refreshToken", keycloak.refreshToken);
+      }
+
+      window.location.href = "/";
     }
-  }, [navigate]);
+  }, []);
 
   const handleLogin = async () => {
+    // Gercek login formu bu componentte degil Keycloak tarafindadir.
+    // redirectUri, login sonrasi kullaniciyi hedef sayfaya geri tasir.
     await keycloak.login({
       redirectUri: `${window.location.origin}${redirectPath}`,
     });

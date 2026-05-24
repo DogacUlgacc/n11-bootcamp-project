@@ -15,6 +15,8 @@ const emptyCardForm = {
 function PaymentPage() {
   const { paymentId } = useParams();
   const location = useLocation();
+  // CartPage payment bilgisini navigate state ile gonderirse tekrar API cagrisi
+  // yapmadan kullanilir; direkt URL acilirsa useEffect paymentId ile backend'e gider.
   const [payment, setPayment] = useState(location.state?.payment || null);
   const [cardForm, setCardForm] = useState(emptyCardForm);
   const [loading, setLoading] = useState(!location.state?.payment);
@@ -23,6 +25,8 @@ function PaymentPage() {
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
+    // payment zaten varsa effect erken cikar. Yoksa URL parametresindeki paymentId
+    // ile backend'den odeme kaydi cekilir.
     if (payment) {
       return;
     }
