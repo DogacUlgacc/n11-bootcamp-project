@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { addToCart } from "../api/cartApi";
 
-wfunction ProductCard({ product }) {
+function ProductCard({ product }) {
   // ProductCard kendi kucuk UI durumunu kendisi tutar: sadece bu kartin
   // "sepete ekleniyor" ve feedback mesaji parent listeyi ilgilendirmez.
   const [adding, setAdding] = useState(false);

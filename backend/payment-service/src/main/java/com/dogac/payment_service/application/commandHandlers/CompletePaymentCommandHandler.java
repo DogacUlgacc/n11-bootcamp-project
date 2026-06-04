@@ -12,20 +12,23 @@ import com.dogac.payment_service.domain.entities.Payment;
 import com.dogac.payment_service.domain.exceptions.PaymentNotFoundException;
 import com.dogac.payment_service.domain.repositories.PaymentRepository;
 import com.dogac.payment_service.domain.valueobjects.PaymentId;
-import com.dogac.payment_service.infrastructure.kafka.publisher.KafkaEventPublisher;
+import com.dogac.payment_service.infrastructure.outbox.OutboxEventService;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class CompletePaymentCommandHandler implements CommandHandler<CompletePaymentCommand, PaymentResponse> {
 
-    private final KafkaEventPublisher kafkaEventPublisher;
     private final PaymentRepository paymentRepository;
     private final PaymentResponseMapper mapper;
+    private final OutboxEventService outboxEventService;
 
-    public CompletePaymentCommandHandler(KafkaEventPublisher kafkaEventPublisher, PaymentRepository paymentRepository,
-            PaymentResponseMapper mapper) {
-        this.kafkaEventPublisher = kafkaEventPublisher;
+    public CompletePaymentCommandHandler(PaymentRepository paymentRepository, PaymentResponseMapper mapper,
+            OutboxEventService outboxEventService) {
         this.paymentRepository = paymentRepository;
         this.mapper = mapper;
+        this.outboxEventService = outboxEventService;
     }
 
     @Override
@@ -36,10 +39,13 @@ public class CompletePaymentCommandHandler implements CommandHandler<CompletePay
 
         payment.complete(command.providerPaymentId());
         Payment saved = paymentRepository.save(payment);
-        kafkaEventPublisher.publishPaymentSucceeded(
-                new PaymentSucceededEvent(saved.getId().value(), saved.getOrderId().value(), saved.getOrderId().value(),
-                        saved.getMoney().amount(), saved.getMoney().currency().toString()));
+        log.info("payment saved " + saved);
+        PaymentSucceededEvent event = new PaymentSucceededEvent(saved.getId().value(), saved.getOrderId().value(),
+                saved.getOrderId().value(),
+                saved.getMoney().amount(), saved.getMoney().currency().toString());
+
+        outboxEventService.savePaymentSucceededEvent(event);
+        log.info("outbox event service ");
         return mapper.toResponse(saved);
     }
-
 }

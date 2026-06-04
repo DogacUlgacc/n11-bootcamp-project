@@ -28,8 +28,16 @@ public class KafkaEventPublisher {
 
     public void publishPaymentFailed(PaymentFailedEvent event) {
         log.info("Publishing PaymentFailedEvent: {}", event);
-        kafkaTemplate.send("payment-failed",
-                event.orderId().toString(),
-                event);
+
+        try {
+            kafkaTemplate.send(
+                    "payment-failed",
+                    event.orderId().toString(),
+                    event).get();
+
+        } catch (Exception e) {
+            log.error("Failed to publish PaymentFailedEvent", e);
+            throw new RuntimeException(e);
+        }
     }
 }

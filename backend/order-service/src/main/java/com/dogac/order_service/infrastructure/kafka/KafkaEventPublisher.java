@@ -14,7 +14,11 @@ public class KafkaEventPublisher {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void publisOrderCreated(OrderCreatedEvent event) {
-        kafkaTemplate.send("order-created", event);
+    public void publishOrderCreated(OrderCreatedEvent event) {
+        try {
+            kafkaTemplate.send("order-created", event).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

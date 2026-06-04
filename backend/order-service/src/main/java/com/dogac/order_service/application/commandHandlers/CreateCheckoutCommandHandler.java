@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.dogac.common_events.event.OrderCreatedEvent;
 import com.dogac.order_service.application.commands.CreateCheckoutCommand;
@@ -23,32 +24,32 @@ import com.dogac.order_service.domain.valueobjects.OrderNumber;
 import com.dogac.order_service.domain.valueobjects.UserId;
 import com.dogac.order_service.infrastructure.feignclients.CartClient;
 import com.dogac.order_service.infrastructure.feignclients.UserClient;
-import com.dogac.order_service.infrastructure.kafka.KafkaEventPublisher;
+import com.dogac.order_service.infrastructure.outbox.OutboxEventService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
 public class CreateCheckoutCommandHandler implements CommandHandler<CreateCheckoutCommand, CreatedOrderResponse> {
-
+    private final OutboxEventService outboxEventService;
     private final CreateOrderMapper createOrderMapper;
     private final OrderRepository orderRepository;
     private final OrderDomainService orderDomainService;
     private final UserClient userClient;
     private final CartClient cartClients;
-    private final KafkaEventPublisher kafkaEventPublisher;
 
-    public CreateCheckoutCommandHandler(CreateOrderMapper createOrderMapper, OrderRepository orderRepository,
-            OrderDomainService orderDomainService, UserClient userClient, CartClient cartClients,
-            KafkaEventPublisher kafkaEventPublisher) {
+    public CreateCheckoutCommandHandler(OutboxEventService outboxEventService, CreateOrderMapper createOrderMapper,
+            OrderRepository orderRepository, OrderDomainService orderDomainService, UserClient userClient,
+            CartClient cartClients) {
+        this.outboxEventService = outboxEventService;
         this.createOrderMapper = createOrderMapper;
         this.orderRepository = orderRepository;
         this.orderDomainService = orderDomainService;
         this.userClient = userClient;
         this.cartClients = cartClients;
-        this.kafkaEventPublisher = kafkaEventPublisher;
     }
 
+    @Transactional
     public CreatedOrderResponse handle(CreateCheckoutCommand command) {
         UserDto userDto = userClient.getUserById(command.userId());
         if (userDto == null) {
@@ -84,9 +85,13 @@ public class CreateCheckoutCommandHandler implements CommandHandler<CreateChecko
                 order.getUserId().value(),
                 cartDto.cartId(),
                 saved.getTotalAmount(), cartDto.currency());
+
         log.info("orderCreatedEvent:" + event);
-        kafkaEventPublisher.publisOrderCreated(event);
-        log.info("Event gönderildi");
+
+    
+        outboxEventService.saveOrderCreatedEvent(event);
+        log.info("OrderCreatedEvent outbox tablosuna kaydedildi");
+
         return createOrderMapper.toResponse(saved);
     }
 }

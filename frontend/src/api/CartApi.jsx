@@ -10,10 +10,10 @@ const redirectToLogin = () => {
 
 const getAuthConfig = async () => {
   if (!keycloak.authenticated) {
-    redirectToLogin();
+    redirectToLogin();  
     return null;
   }
-
+  
   await keycloak.updateToken(30);
 
   return {

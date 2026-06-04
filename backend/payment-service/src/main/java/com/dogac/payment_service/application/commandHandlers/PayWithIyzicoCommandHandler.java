@@ -16,7 +16,7 @@ import com.dogac.payment_service.domain.entities.Payment;
 import com.dogac.payment_service.domain.exceptions.PaymentNotFoundException;
 import com.dogac.payment_service.domain.repositories.PaymentRepository;
 import com.dogac.payment_service.domain.valueobjects.PaymentId;
-import com.dogac.payment_service.infrastructure.kafka.publisher.KafkaEventPublisher;
+import com.dogac.payment_service.infrastructure.outbox.OutboxEventService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,73 +24,73 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PayWithIyzicoCommandHandler implements CommandHandler<PayWithIyzicoCommand, PaymentResponse> {
 
-    private final PaymentRepository paymentRepository;
-    private final PaymentProviderClient paymentProviderClient;
-    private final PaymentResponseMapper paymentMapper;
-    private final KafkaEventPublisher kafkaEventPublisher;
+        private final PaymentRepository paymentRepository;
+        private final PaymentProviderClient paymentProviderClient;
+        private final PaymentResponseMapper paymentMapper;
+        private final OutboxEventService outboxEventService;
 
-    public PayWithIyzicoCommandHandler(PaymentRepository paymentRepository, PaymentProviderClient paymentProviderClient,
-            PaymentResponseMapper paymentMapper,
-            com.dogac.payment_service.infrastructure.kafka.publisher.KafkaEventPublisher kafkaEventPublisher) {
-        this.paymentRepository = paymentRepository;
-        this.paymentProviderClient = paymentProviderClient;
-        this.paymentMapper = paymentMapper;
-        this.kafkaEventPublisher = kafkaEventPublisher;
-    }
-
-    @Override
-    @Transactional
-    public PaymentResponse handle(PayWithIyzicoCommand command) {
-
-        log.info("PayWithIyzicoCommand started. paymentId={}", command.paymentId());
-
-        Payment payment = paymentRepository.findById(
-                PaymentId.from(command.paymentId()))
-                .orElseThrow(() -> new PaymentNotFoundException("Payment not found"));
-
-        ProviderPaymentResult result = paymentProviderClient.pay(
-                payment,
-                new CardInfo(
-                        command.cardHolderName(),
-                        command.cardNumber(),
-                        command.expireMonth(),
-                        command.expireYear(),
-                        command.cvc()));
-
-        if (result.success()) {
-            payment.complete(result.providerPaymentId());
-
-            Payment saved = paymentRepository.save(payment);
-
-            kafkaEventPublisher.publishPaymentSucceeded(
-                    new PaymentSucceededEvent(
-                            saved.getId().value(),
-                            saved.getOrderId().value(),
-                            saved.getOrderId().value(),
-                            saved.getMoney().amount(),
-                            saved.getMoney().currency().getCurrencyCode()));
-
-            log.info("Payment completed with Iyzico. paymentId={}, providerPaymentId={}",
-                    saved.getId().value(),
-                    result.providerPaymentId());
-
-            return paymentMapper.toResponse(saved);
+        public PayWithIyzicoCommandHandler(PaymentRepository paymentRepository,
+                        PaymentProviderClient paymentProviderClient,
+                        PaymentResponseMapper paymentMapper, OutboxEventService outboxEventService) {
+                this.paymentRepository = paymentRepository;
+                this.paymentProviderClient = paymentProviderClient;
+                this.paymentMapper = paymentMapper;
+                this.outboxEventService = outboxEventService;
         }
 
-        payment.fail(result.errorMessage());
+        @Override
+        @Transactional
+        public PaymentResponse handle(PayWithIyzicoCommand command) {
 
-        Payment saved = paymentRepository.save(payment);
+                log.info("PayWithIyzicoCommand started. paymentId={}", command.paymentId());
 
-        kafkaEventPublisher.publishPaymentFailed(
-                new PaymentFailedEvent(
-                        saved.getId().value(),
-                        saved.getOrderId().value(),
-                        result.errorMessage()));
+                Payment payment = paymentRepository.findById(
+                                PaymentId.from(command.paymentId()))
+                                .orElseThrow(() -> new PaymentNotFoundException("Payment not found"));
 
-        log.warn("Payment failed with Iyzico. paymentId={}, reason={}",
-                saved.getId().value(),
-                result.errorMessage());
+                ProviderPaymentResult result = paymentProviderClient.pay(
+                                payment,
+                                new CardInfo(
+                                                command.cardHolderName(),
+                                                command.cardNumber(),
+                                                command.expireMonth(),
+                                                command.expireYear(),
+                                                command.cvc()));
 
-        return paymentMapper.toResponse(saved);
-    }
+                if (result.success()) {
+                        payment.complete(result.providerPaymentId());
+
+                        Payment saved = paymentRepository.save(payment);
+                        PaymentSucceededEvent succeededEvent = new PaymentSucceededEvent(
+                                        saved.getId().value(),
+                                        saved.getOrderId().value(),
+                                        saved.getOrderId().value(),
+                                        saved.getMoney().amount(),
+                                        saved.getMoney().currency().getCurrencyCode());
+
+                        outboxEventService.savePaymentSucceededEvent(succeededEvent);
+
+                        log.info("Payment completed with Iyzico. paymentId={}, providerPaymentId={}",
+                                        saved.getId().value(),
+                                        result.providerPaymentId());
+
+                        return paymentMapper.toResponse(saved);
+                }
+
+                payment.fail(result.errorMessage());
+
+                Payment saved = paymentRepository.save(payment);
+
+                PaymentFailedEvent failedEvent = new PaymentFailedEvent(
+                                saved.getId().value(),
+                                saved.getOrderId().value(),
+                                result.errorMessage());
+
+                outboxEventService.savePaymentFailedEvent(failedEvent);
+                log.warn("Payment failed with Iyzico. paymentId={}, reason={}",
+                                saved.getId().value(),
+                                result.errorMessage());
+
+                return paymentMapper.toResponse(saved);
+        }
 }
