@@ -11,4 +11,6 @@ public interface SpringDataCartRepository extends JpaRepository<JpaCartEntity, U
     Optional<JpaCartEntity> findByUserId(UUID userId);
 
     Optional<JpaCartEntity> findByIdAndUserId(UUID id, UUID userId);
+
+    boolean existsByUserId(UUID userId);
 }

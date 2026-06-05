@@ -20,7 +20,7 @@ public class OrderCreatedEventListener {
         this.commandBus = commandBus;
     }
 
-    @KafkaListener(topics = "order-created", groupId = "payment-service")
+    @KafkaListener(topics = "order-created", groupId = "payment-service", containerFactory = "kafkaListenerContainerFactory")
     @Transactional
     public void handleOrderCreated(OrderCreatedEvent event) {
         log.info("OrderCreatedEvent received: {}", event);

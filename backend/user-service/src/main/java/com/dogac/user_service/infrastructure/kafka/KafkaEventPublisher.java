@@ -15,6 +15,10 @@ public class KafkaEventPublisher {
     }
 
     public void publishUserRegistered(UserRegisteredEvent event) {
-        kafkaTemplate.send("user-registered", event);
+        try {
+            kafkaTemplate.send("user-registered", event).get();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to publish UserRegisteredEvent", e);
+        }
     }
 }

@@ -14,8 +14,8 @@ import com.dogac.user_service.domain.services.UserDomainService;
 import com.dogac.user_service.domain.valueobjects.Email;
 import com.dogac.user_service.domain.valueobjects.ExternalId;
 import com.dogac.user_service.domain.valueobjects.PhoneNumber;
-import com.dogac.user_service.infrastructure.kafka.KafkaEventPublisher;
 import com.dogac.user_service.infrastructure.keycloack.KeycloakUserProvider;
+import com.dogac.user_service.infrastructure.outbox.OutboxEventService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,16 +28,16 @@ public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCo
     private final RegisterUserMapper registerUserMapper;
     private final KeycloakUserProvider keycloakUserProvider;
     private final UserDomainService userDomainService;
-    private final KafkaEventPublisher kafkaEventPublisher;
+    private final OutboxEventService outboxEventService;
 
     public RegisterUserCommandHandler(UserRepository userRepository, RegisterUserMapper registerUserMapper,
             KeycloakUserProvider keycloakUserProvider, UserDomainService userDomainService,
-            KafkaEventPublisher kafkaEventPublisher) {
+            OutboxEventService outboxEventService) {
         this.userRepository = userRepository;
         this.registerUserMapper = registerUserMapper;
         this.keycloakUserProvider = keycloakUserProvider;
         this.userDomainService = userDomainService;
-        this.kafkaEventPublisher = kafkaEventPublisher;
+        this.outboxEventService = outboxEventService;
     }
 
     @Override
@@ -67,8 +67,10 @@ public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCo
                 savedUser.getExternalId().value(),
                 savedUser.getEmail().value());
 
-        kafkaEventPublisher.publishUserRegistered(userRegisteredEvent);
-        log.info("UserRegisteredEvent published!" + userRegisteredEvent);
+        outboxEventService.saveUserRegisteredEvent(userRegisteredEvent);
+
+        log.info("UserRegisteredEvent written to outbox. userId={}", savedUser.getId());
+
         return registerUserMapper.toResponse(savedUser);
 
     }

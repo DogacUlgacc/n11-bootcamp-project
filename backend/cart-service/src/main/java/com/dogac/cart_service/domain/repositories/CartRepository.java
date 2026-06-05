@@ -1,6 +1,7 @@
 package com.dogac.cart_service.domain.repositories;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import com.dogac.cart_service.domain.cart.Cart;
 import com.dogac.cart_service.domain.cart.CartId;
@@ -15,5 +16,7 @@ public interface CartRepository {
     Optional<Cart> findByIdAndUserId(CartId cartId, UserId userId);
 
     void save(Cart cart);
+
+    boolean existsByUserId(UUID userId);
 
 }

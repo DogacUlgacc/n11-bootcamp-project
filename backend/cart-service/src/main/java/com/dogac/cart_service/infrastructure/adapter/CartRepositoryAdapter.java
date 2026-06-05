@@ -1,6 +1,7 @@
 package com.dogac.cart_service.infrastructure.adapter;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
@@ -41,6 +42,11 @@ public class CartRepositoryAdapter implements CartRepository {
     @Override
     public Optional<Cart> findByIdAndUserId(CartId cartId, UserId userId) {
         return cartRepository.findByIdAndUserId(cartId.value(), userId.value()).map(cartMapper::toDomain);
+    }
+
+    @Override
+    public boolean existsByUserId(UUID userId) {
+        return cartRepository.existsByUserId(userId);
     }
 
 }
