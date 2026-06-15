@@ -1,5 +1,7 @@
 package com.dogac.order_service.infrastructure.kafka.listener;
 
+import java.time.Instant;
+
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,25 +11,37 @@ import com.dogac.order_service.domain.entities.Order;
 import com.dogac.order_service.domain.exceptions.OrderNotFoundException;
 import com.dogac.order_service.domain.repositories.OrderRepository;
 import com.dogac.order_service.domain.valueobjects.OrderId;
+import com.dogac.order_service.infrastructure.persistence.entity.ProcessedEventEntity;
+import com.dogac.order_service.infrastructure.persistence.repository.ProcessedEventJpaRepository;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class PaymentSucceededEventListener {
     private final OrderRepository orderRepository;
-
-    public PaymentSucceededEventListener(OrderRepository orderRepository) {
-        this.orderRepository = orderRepository;
-    }
+    private final ProcessedEventJpaRepository processedEventJpaRepository;
 
     @KafkaListener(topics = "payment-succeeded", groupId = "order-service")
     @Transactional
     public void handlePaymentSucceeded(PaymentSucceededEvent event) {
+        log.info("PaymentSucceededEventListener çalıştı ");
+        
+        if (processedEventJpaRepository.existsByEventId(event.eventId())) {
+            log.info("Duplicate event ignored: {}", event.eventId());
+            return;
+        }
+
+        processedEventJpaRepository.save(
+                new ProcessedEventEntity(event.eventId(), Instant.now()));
+
         log.info("payment-succeeded event: {} " + event);
         Order order = orderRepository.findById(OrderId.from(event.orderId()))
                 .orElseThrow(() -> new OrderNotFoundException("OrderNotFound!"));
         order.confirm();
+
         orderRepository.save(order);
     }
 

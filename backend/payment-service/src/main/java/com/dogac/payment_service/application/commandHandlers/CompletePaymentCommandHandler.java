@@ -1,5 +1,7 @@
 package com.dogac.payment_service.application.commandHandlers;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +42,8 @@ public class CompletePaymentCommandHandler implements CommandHandler<CompletePay
         payment.complete(command.providerPaymentId());
         Payment saved = paymentRepository.save(payment);
         log.info("payment saved " + saved);
-        PaymentSucceededEvent event = new PaymentSucceededEvent(saved.getId().value(), saved.getOrderId().value(),
+        PaymentSucceededEvent event = new PaymentSucceededEvent(UUID.randomUUID(),
+                saved.getId().value(), saved.getOrderId().value(),
                 saved.getOrderId().value(),
                 saved.getMoney().amount(), saved.getMoney().currency().toString());
 

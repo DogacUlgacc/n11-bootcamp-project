@@ -1,5 +1,7 @@
 package com.dogac.payment_service.application.commandHandlers;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +15,8 @@ import com.dogac.payment_service.application.port.CardInfo;
 import com.dogac.payment_service.application.port.PaymentProviderClient;
 import com.dogac.payment_service.application.port.ProviderPaymentResult;
 import com.dogac.payment_service.domain.entities.Payment;
+import com.dogac.payment_service.domain.enums.PaymentStatus;
+import com.dogac.payment_service.domain.exceptions.PaymentAlreadyCompletedException;
 import com.dogac.payment_service.domain.exceptions.PaymentNotFoundException;
 import com.dogac.payment_service.domain.repositories.PaymentRepository;
 import com.dogac.payment_service.domain.valueobjects.PaymentId;
@@ -48,6 +52,10 @@ public class PayWithIyzicoCommandHandler implements CommandHandler<PayWithIyzico
                                 PaymentId.from(command.paymentId()))
                                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found"));
 
+                if (payment.getStatus() == PaymentStatus.COMPLETED) {
+                        throw new PaymentAlreadyCompletedException("Payment already completed");
+                }
+
                 ProviderPaymentResult result = paymentProviderClient.pay(
                                 payment,
                                 new CardInfo(
@@ -62,6 +70,7 @@ public class PayWithIyzicoCommandHandler implements CommandHandler<PayWithIyzico
 
                         Payment saved = paymentRepository.save(payment);
                         PaymentSucceededEvent succeededEvent = new PaymentSucceededEvent(
+                                        UUID.randomUUID(),
                                         saved.getId().value(),
                                         saved.getOrderId().value(),
                                         saved.getOrderId().value(),
@@ -82,6 +91,7 @@ public class PayWithIyzicoCommandHandler implements CommandHandler<PayWithIyzico
                 Payment saved = paymentRepository.save(payment);
 
                 PaymentFailedEvent failedEvent = new PaymentFailedEvent(
+                                UUID.randomUUID(),
                                 saved.getId().value(),
                                 saved.getOrderId().value(),
                                 result.errorMessage());

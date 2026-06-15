@@ -33,9 +33,10 @@ class PaymentSucceededEventListenerTest {
 
     @Test
     void shouldConfirmOrderWhenPaymentSucceededEventReceived() {
-        PaymentSucceededEventListener listener = new PaymentSucceededEventListener(orderRepository);
+        PaymentSucceededEventListener listener = new PaymentSucceededEventListener(orderRepository, null);
         Order order = newOrder();
         PaymentSucceededEvent event = new PaymentSucceededEvent(
+                UUID.randomUUID(),
                 UUID.randomUUID(),
                 order.getId().value(),
                 order.getUserId().value(),

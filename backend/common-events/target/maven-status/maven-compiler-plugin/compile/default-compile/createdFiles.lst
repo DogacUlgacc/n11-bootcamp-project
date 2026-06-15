@@ -1,5 +1,7 @@
 com\dogac\common_events\enums\Currency.class
 com\dogac\common_events\event\UserRegisteredEvent.class
+com\dogac\common_events\enums\OutboxStatus.class
+com\dogac\common_events\exceptions\EventSerializationException.class
 com\dogac\common_events\event\OrderCreatedEvent.class
 com\dogac\common_events\event\PaymentFailedEvent.class
 com\dogac\Main.class

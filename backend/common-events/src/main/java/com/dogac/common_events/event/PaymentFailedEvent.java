@@ -3,7 +3,8 @@ package com.dogac.common_events.event;
 import java.util.UUID;
 
 public record PaymentFailedEvent(
-        UUID paymentId,
-        UUID orderId,
-        String reason) {
+                UUID eventId,
+                UUID paymentId,
+                UUID orderId,
+                String reason) {
 }

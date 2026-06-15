@@ -1,5 +1,7 @@
 package com.dogac.payment_service.application.commandHandlers;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +23,7 @@ public class FailPaymentCommandHandler
         private final PaymentRepository paymentRepository;
         private final PaymentResponseMapper mapper;
         private final OutboxEventService outboxEventService;
-
+        
         public FailPaymentCommandHandler(PaymentRepository paymentRepository, PaymentResponseMapper mapper,
                         OutboxEventService outboxEventService) {
                 this.paymentRepository = paymentRepository;
@@ -39,6 +41,7 @@ public class FailPaymentCommandHandler
                 Payment saved = paymentRepository.save(payment);
 
                 PaymentFailedEvent event = new PaymentFailedEvent(
+                                UUID.randomUUID(),
                                 saved.getId().value(),
                                 saved.getOrderId().value(),
                                 command.reason());
