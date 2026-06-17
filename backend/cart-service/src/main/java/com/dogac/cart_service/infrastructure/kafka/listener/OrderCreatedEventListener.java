@@ -19,7 +19,7 @@ public class OrderCreatedEventListener {
         this.cartRepository = cartRepository;
     }
 
-    @KafkaListener(topics = "order-created", groupId = "cart-service")
+    @KafkaListener(topics = "order-created", groupId = "cart-service", containerFactory = "kafkaListenerContainerFactory")
     @Transactional
     public void handleOrderCreated(OrderCreatedEvent event) {
 

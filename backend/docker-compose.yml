@@ -1,4 +1,13 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: product-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
   postgres:
     image: postgres:13
     restart: always
@@ -147,5 +156,6 @@ volumes:
   orderdb_vol:
   kafka-data:
   postgres_data:
+  redis_data:
 networks:
   kafkanet:

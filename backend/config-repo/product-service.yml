@@ -7,6 +7,14 @@ spring:
     username: product_db
     password: product-password
     driver-class-name: org.postgresql.Driver
+
+  cache:
+    type: redis
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
   jpa:
     hibernate:
       ddl-auto: update
