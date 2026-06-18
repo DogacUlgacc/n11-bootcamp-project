@@ -2,30 +2,35 @@ package com.dogac.product_service.infrastructure.redis.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 
 @Configuration
 public class RedisConfig {
 
-    @Bean
-    RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        @Bean
+        public RedisCacheConfiguration cacheConfiguration(ObjectMapper objectMapper) {
+                ObjectMapper redisObjectMapper = objectMapper.copy();
+                redisObjectMapper.activateDefaultTyping(
+                                LaissezFaireSubTypeValidator.instance,
+                                ObjectMapper.DefaultTyping.EVERYTHING,
+                                JsonTypeInfo.As.PROPERTY);
 
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
+                GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(
+                                redisObjectMapper);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.activateDefaultTyping(
-                LaissezFaireSubTypeValidator.instance,
-                ObjectMapper.DefaultTyping.NON_FINAL);
-
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
-        template.setDefaultSerializer(serializer);
-
-        return template;
-    }
+                return RedisCacheConfiguration.defaultCacheConfig()
+                                .serializeKeysWith(
+                                                RedisSerializationContext.SerializationPair
+                                                                .fromSerializer(new StringRedisSerializer()))
+                                .serializeValuesWith(
+                                                RedisSerializationContext.SerializationPair
+                                                                .fromSerializer(serializer));
+        }
 }
