@@ -1,5 +1,6 @@
 package com.dogac.cart_service.application.commandHandlers;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ public class RemoveCartItemCommandHandler implements CommandHandler<RemoveCartIt
 
     @Override
     @Transactional
+    @CacheEvict(value = "cart-by-user", key = "#command.userId()")
     public Void handle(RemoveCartItemCommand command) {
 
         Cart cart = cartRepository.findById(CartId.from(command.cartId()))

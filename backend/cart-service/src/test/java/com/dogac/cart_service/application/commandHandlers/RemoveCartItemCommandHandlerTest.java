@@ -40,8 +40,10 @@ class RemoveCartItemCommandHandlerTest {
         UUID productId = UUID.randomUUID();
         Cart cart = Cart.create(UserId.from(UUID.randomUUID()), Currency.TRY);
         cart.addItem(ProductId.from(productId), Quantity.of(4), Money.from(BigDecimal.valueOf(10), Currency.TRY));
-        RemoveCartItemCommand command = new RemoveCartItemCommand(cart.getId().value(), productId);
-        when(cartRepository.findById(CartId.from(command.cartId()))).thenReturn(Optional.of(cart));
+        RemoveCartItemCommand command = new RemoveCartItemCommand(cart.getId().value(), cart.getUserId().value(),
+                productId);
+        when(cartRepository.findByIdAndUserId(CartId.from(command.cartId()), UserId.from(command.userId())))
+                .thenReturn(Optional.of(cart));
 
         handler.handle(command);
 

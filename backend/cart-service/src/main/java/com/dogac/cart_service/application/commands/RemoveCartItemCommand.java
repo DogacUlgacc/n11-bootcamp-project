@@ -6,5 +6,6 @@ import com.dogac.cart_service.application.core.Command;
 
 public record RemoveCartItemCommand(
         UUID cartId,
+        UUID userId,
         UUID productId) implements Command<Void> {
 }

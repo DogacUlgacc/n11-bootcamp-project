@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
 import com.dogac.cart_service.application.commands.UpdateCartItemQuantityCommand;
@@ -41,6 +42,7 @@ public class UpdateCartItemQuantityCommandHandler
     // kullanıyoruz!*/
 
     @Override
+    @CacheEvict(value = "cart-by-user", key = "#command.userId()")
     public CartResponse handle(UpdateCartItemQuantityCommand command) {
         Cart cart = cartRepository.findById(
                 CartId.from(command.cartId()))
@@ -48,9 +50,7 @@ public class UpdateCartItemQuantityCommandHandler
         logger.info("buraya bak" + cart.getId());
 
         List<CartItem> list = cart.getItems();
-        for (CartItem cartItem : list) {
-            System.out.println(cartItem);
-        }
+
         CartItem item = cart.getItems()
                 .stream()
                 .filter(i -> i.getProductId().equals(ProductId.from(command.productId())))

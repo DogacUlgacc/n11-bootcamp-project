@@ -32,7 +32,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/carts")
-
 public class CartController {
 
     private final CommandBus commandBus;
@@ -61,11 +60,7 @@ public class CartController {
     public ResponseEntity<Void> addItem(
             @RequestHeader("X-External-Id") String externalId,
             @RequestBody AddItemToCartCommand request) {
-        System.out.println("ExternalId header: " + externalId);
-
         UserDto user = userClient.getUserByExternalId(externalId);
-        System.out.println("Found user id: " + user.id());
-        System.out.println("ExternalId header: " + externalId);
         commandBus.send(new AddItemToCartCommand(
                 user.id(),
                 request.productId(),
@@ -82,16 +77,16 @@ public class CartController {
 
     @PutMapping("/{cartId}/items/{productId}")
     public ResponseEntity<CartResponse> updateQuantity(
+            @RequestHeader("X-External-Id") String externalId,
             @PathVariable UUID cartId,
             @PathVariable UUID productId,
             @Valid @RequestBody UpdateQuantityRequest request) {
 
-        // TODO: Bu metodu keycloak entegrasyonundan sonra güncelle!
-        UUID userId = UUID.randomUUID();
+        UserDto user = userClient.getUserByExternalId(externalId);
         CartResponse response = commandBus.send(
                 new UpdateCartItemQuantityCommand(
                         cartId,
-                        userId,
+                        user.id(),
                         productId,
                         request.quantity()));
 
@@ -100,9 +95,11 @@ public class CartController {
 
     @DeleteMapping("/{cartId}/items/{productId}")
     public ResponseEntity<Void> deleteItem(
+            @RequestHeader("X-External-Id") String externalId,
             @PathVariable UUID cartId,
             @PathVariable UUID productId) {
-        RemoveCartItemCommand command = new RemoveCartItemCommand(cartId, productId);
+        UserDto user = userClient.getUserByExternalId(externalId);
+        RemoveCartItemCommand command = new RemoveCartItemCommand(cartId, user.id(), productId);
         commandBus.send(command);
         return ResponseEntity.noContent().build();
     }

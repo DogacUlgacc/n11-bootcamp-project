@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 public class RedisConfig {
 
         @Bean
-        public RedisCacheConfiguration cacheConfiguration(ObjectMapper objectMapper) {
+        RedisCacheConfiguration cacheConfiguration(ObjectMapper objectMapper) {
                 ObjectMapper redisObjectMapper = objectMapper.copy();
                 redisObjectMapper.activateDefaultTyping(
                                 LaissezFaireSubTypeValidator.instance,

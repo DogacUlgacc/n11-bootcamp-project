@@ -1,6 +1,8 @@
 package com.dogac.cart_service.application.commandHandlers;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.dogac.cart_service.application.commands.AddItemToCartCommand;
 import com.dogac.cart_service.application.core.CommandHandler;
@@ -32,6 +34,8 @@ public class AddItemToCartCommandHandler implements CommandHandler<AddItemToCart
     }
 
     @Override
+    @Transactional
+    @CacheEvict(value = "cart-by-user", key = "#command.userId()")
     public Void handle(AddItemToCartCommand command) {
         System.out.println("AddItemToCartCommand handle()");
         /* TODO:// DAHA SONRA SECURİTY İLE HALLEDECEĞİZ */
