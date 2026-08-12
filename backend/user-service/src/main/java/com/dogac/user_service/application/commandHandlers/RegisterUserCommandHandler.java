@@ -19,9 +19,9 @@ import com.dogac.user_service.infrastructure.outbox.OutboxEventService;
 
 import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @Transactional
-@Slf4j
 public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCommand, RegisteredUserResponse> {
 
     private final UserRepository userRepository;
