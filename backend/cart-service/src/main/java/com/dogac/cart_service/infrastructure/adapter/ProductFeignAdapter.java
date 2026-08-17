@@ -7,22 +7,24 @@ import org.springframework.stereotype.Component;
 import com.dogac.cart_service.application.dto.feignDto.Currency;
 import com.dogac.cart_service.application.dto.feignDto.ProductDto;
 import com.dogac.cart_service.application.port.ProductPort;
-import com.dogac.cart_service.infrastructure.feignclient.ProductClient;
+import com.dogac.cart_service.infrastructure.resilience.ProductRetryService;
 
 @Component
 public class ProductFeignAdapter implements ProductPort {
 
-    private final ProductClient productClient;
+    private final ProductRetryService productRetryService;
 
-    public ProductFeignAdapter(ProductClient productClient) {
-        this.productClient = productClient;
+    public ProductFeignAdapter(
+            ProductRetryService productRetryService) {
+
+        this.productRetryService = productRetryService;
     }
 
     @Override
     public ProductDto getProductById(UUID id) {
-        ProductDto response = productClient.getProductById(id);
 
-        // ProductResponse.currency -> CartService Currency enum
+        ProductDto response = productRetryService.getProductById(id);
+
         Currency currency = Currency.valueOf(response.currency().name());
 
         return new ProductDto(

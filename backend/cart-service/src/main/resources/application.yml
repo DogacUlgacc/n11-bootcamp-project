@@ -3,3 +3,57 @@ spring:
     name: cart-service
   config:
     import: optional:configserver:http://localhost:8071
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        ignoreExceptions:
+          - feign.FeignException.NotFound
+      productService:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        ignoreExceptions:
+          - feign.FeignException.NotFound
+  retry:
+    instances:
+      userService:
+        maxAttempts: 3
+        waitDuration: 500ms
+        retryExceptions:
+          - feign.RetryableException
+          - java.io.IOException
+          - java.net.SocketTimeoutException
+        ignoreExceptions:
+          - feign.FeignException.NotFound
+      productService:
+        maxAttempts: 3
+        waitDuration: 500ms
+        retryExceptions:
+          - feign.RetryableException
+          - java.io.IOException
+          - java.net.SocketTimeoutException
+          - feign.FeignException.ServiceUnavailable
+        ignoreExceptions:
+          - feign.FeignException.NotFound
+  timelimiter:
+    instances:
+      userService:
+        timeoutDuration: 3s
+      productService:
+        timeoutDuration: 3s
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 2000
+            readTimeout: 3000

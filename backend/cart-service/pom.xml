@@ -109,16 +109,38 @@
 			<version>2.3.0</version>
 	</dependency>
          <!--Openfeing-->
-    <dependency>
+    <!-- <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-openfeign-core</artifactId>
         <version>4.3.0</version>
+        <scope>compile</scope>
+    </dependency> -->
+   <!--Openfeing + Spring Cloud -->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-openfeign</artifactId>
         <scope>compile</scope>
     </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-slf4j</artifactId>
-        </dependency>
+    </dependency>
+    <!--circuitbreaker-resilience4j-->
+    <dependency>
+        <groupId>io.github.resilience4j</groupId>
+        <artifactId>resilience4j-spring-boot3</artifactId>
+    </dependency>
+    <!-- <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+        <scope>compile</scope>
+    </dependency> -->
+     <!--AOP starter-->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-aop</artifactId>
+        <scope>compile</scope>
+    </dependency>
     <dependency>
         <groupId>org.springframework.kafka</groupId>
         <artifactId>spring-kafka</artifactId>
