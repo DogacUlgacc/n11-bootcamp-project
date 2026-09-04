@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
         body.put("timestamp", Instant.now().toString());
         body.put("status", 404);
         body.put("error", "Not Found");
-        body.put("message", "Product with given id not found");
+      //  body.put("message", "Product with given id not found");
 
         return ResponseEntity.status(404).body(body);
     }

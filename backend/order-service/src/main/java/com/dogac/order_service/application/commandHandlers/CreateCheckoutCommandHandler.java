@@ -11,8 +11,9 @@ import com.dogac.order_service.application.commands.CreateCheckoutCommand;
 import com.dogac.order_service.application.core.CommandHandler;
 import com.dogac.order_service.application.dto.CreatedOrderResponse;
 import com.dogac.order_service.application.feignDto.CartDto;
-import com.dogac.order_service.application.feignDto.UserDto;
 import com.dogac.order_service.application.mapper.CreateOrderMapper;
+import com.dogac.order_service.application.port.CartPort;
+import com.dogac.order_service.application.port.UserPort;
 import com.dogac.order_service.domain.entities.Order;
 import com.dogac.order_service.domain.enums.OrderStatus;
 import com.dogac.order_service.domain.repositories.OrderRepository;
@@ -22,8 +23,6 @@ import com.dogac.order_service.domain.valueobjects.OrderId;
 import com.dogac.order_service.domain.valueobjects.OrderItem;
 import com.dogac.order_service.domain.valueobjects.OrderNumber;
 import com.dogac.order_service.domain.valueobjects.UserId;
-import com.dogac.order_service.infrastructure.feignclients.CartClient;
-import com.dogac.order_service.infrastructure.feignclients.UserClient;
 import com.dogac.order_service.infrastructure.outbox.OutboxEventService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,67 +30,66 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class CreateCheckoutCommandHandler implements CommandHandler<CreateCheckoutCommand, CreatedOrderResponse> {
-    private final OutboxEventService outboxEventService;
-    private final CreateOrderMapper createOrderMapper;
-    private final OrderRepository orderRepository;
-    private final OrderDomainService orderDomainService;
-    private final UserClient userClient;
-    private final CartClient cartClients;
+        private final OutboxEventService outboxEventService;
+        private final CreateOrderMapper createOrderMapper;
+        private final OrderRepository orderRepository;
+        private final OrderDomainService orderDomainService;
+        private final UserPort userPort;
+        private final CartPort cartPort;
 
-    public CreateCheckoutCommandHandler(OutboxEventService outboxEventService, CreateOrderMapper createOrderMapper,
-            OrderRepository orderRepository, OrderDomainService orderDomainService, UserClient userClient,
-            CartClient cartClients) {
-        this.outboxEventService = outboxEventService;
-        this.createOrderMapper = createOrderMapper;
-        this.orderRepository = orderRepository;
-        this.orderDomainService = orderDomainService;
-        this.userClient = userClient;
-        this.cartClients = cartClients;
-    }
-
-    @Transactional
-    public CreatedOrderResponse handle(CreateCheckoutCommand command) {
-        UserDto userDto = userClient.getUserById(command.userId());
-        if (userDto == null) {
-            throw new RuntimeException("usernotfound");
+        public CreateCheckoutCommandHandler(OutboxEventService outboxEventService, CreateOrderMapper createOrderMapper,
+                        OrderRepository orderRepository, OrderDomainService orderDomainService, UserPort userPort,
+                        CartPort cartPort) {
+                this.outboxEventService = outboxEventService;
+                this.createOrderMapper = createOrderMapper;
+                this.orderRepository = orderRepository;
+                this.orderDomainService = orderDomainService;
+                this.userPort = userPort;
+                this.cartPort = cartPort;
         }
-        log.info("userDto: " + userDto);
-        CartDto cartDto = cartClients.getCartById(command.cartId());
 
-        log.info("cartdto: " + cartDto);
-        List<OrderItem> orderItems = cartDto.items()
-                .stream()
-                .map(OrderItem::fromCartItem)
-                .toList();
+        @Transactional
+        public CreatedOrderResponse handle(CreateCheckoutCommand command) {
+                // UserDto userDto = userPort.getUserById(command.userId());
+                // if (userDto == null) {
+                // throw new RuntimeException("usernotfound");
+                // }
+                // log.info("userDto: " + userDto);
+                CartDto cartDto = cartPort.getCartById(command.cartId());
 
-        OrderNumber orderNumber = OrderNumber.generate();
-        orderDomainService.ensureOrderNumberIsUnique(orderNumber);
+                log.info("cartdto: " + cartDto);
+                List<OrderItem> orderItems = cartDto.items()
+                                .stream()
+                                .map(OrderItem::fromCartItem)
+                                .toList();
 
-        Order order = new Order(
-                OrderId.newId(),
-                new ExternalId("placeholder-external-id"),
-                orderNumber,
-                UserId.from(command.userId()),
-                orderItems,
-                null,
-                OrderStatus.CREATED,
-                Instant.now(),
-                Instant.now());
+                OrderNumber orderNumber = OrderNumber.generate();
+                orderDomainService.ensureOrderNumberIsUnique(orderNumber);
 
-        Order saved = orderRepository.save(order);
+                Order order = new Order(
+                                OrderId.newId(),
+                                new ExternalId("placeholder-external-id"),
+                                orderNumber,
+                                UserId.from(command.userId()),
+                                orderItems,
+                                null,
+                                OrderStatus.CREATED,
+                                Instant.now(),
+                                Instant.now());
 
-        OrderCreatedEvent event = new OrderCreatedEvent(
-                order.getId().value(),
-                order.getUserId().value(),
-                cartDto.cartId(),
-                saved.getTotalAmount(), cartDto.currency());
+                Order saved = orderRepository.save(order);
 
-        log.info("orderCreatedEvent:" + event);
+                OrderCreatedEvent event = new OrderCreatedEvent(
+                                order.getId().value(),
+                                order.getUserId().value(),
+                                cartDto.cartId(),
+                                saved.getTotalAmount(), cartDto.currency());
 
-    
-        outboxEventService.saveOrderCreatedEvent(event);
-        log.info("OrderCreatedEvent outbox tablosuna kaydedildi");
+                log.info("orderCreatedEvent:" + event);
 
-        return createOrderMapper.toResponse(saved);
-    }
+                outboxEventService.saveOrderCreatedEvent(event);
+                log.info("OrderCreatedEvent outbox tablosuna kaydedildi");
+
+                return createOrderMapper.toResponse(saved);
+        }
 }

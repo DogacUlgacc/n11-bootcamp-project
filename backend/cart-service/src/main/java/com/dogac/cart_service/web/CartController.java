@@ -24,9 +24,9 @@ import com.dogac.cart_service.application.dto.CartResponse;
 import com.dogac.cart_service.application.dto.CreatedCartResponse;
 import com.dogac.cart_service.application.dto.UpdateQuantityRequest;
 import com.dogac.cart_service.application.dto.feignDto.UserDto;
+import com.dogac.cart_service.application.port.UserPort;
 import com.dogac.cart_service.application.queries.GetCartByIdQuery;
 import com.dogac.cart_service.application.queries.GetCartByUserIdQuery;
-import com.dogac.cart_service.infrastructure.feignclient.UserClient;
 
 import jakarta.validation.Valid;
 
@@ -36,12 +36,12 @@ public class CartController {
 
     private final CommandBus commandBus;
     private final QueryBus queryBus;
-    private final UserClient userClient;
+    private final UserPort userPort;
 
-    public CartController(CommandBus commandBus, QueryBus queryBus, UserClient userClient) {
+    public CartController(CommandBus commandBus, QueryBus queryBus, UserPort userPort) {
         this.commandBus = commandBus;
         this.queryBus = queryBus;
-        this.userClient = userClient;
+        this.userPort = userPort;
     }
 
     @GetMapping("/user/{userId}")
@@ -60,7 +60,7 @@ public class CartController {
     public ResponseEntity<Void> addItem(
             @RequestHeader("X-External-Id") String externalId,
             @RequestBody AddItemToCartCommand request) {
-        UserDto user = userClient.getUserByExternalId(externalId);
+        UserDto user = userPort.getUserByExternalId(externalId);
         commandBus.send(new AddItemToCartCommand(
                 user.id(),
                 request.productId(),
@@ -82,7 +82,7 @@ public class CartController {
             @PathVariable UUID productId,
             @Valid @RequestBody UpdateQuantityRequest request) {
 
-        UserDto user = userClient.getUserByExternalId(externalId);
+        UserDto user = userPort.getUserByExternalId(externalId);
         CartResponse response = commandBus.send(
                 new UpdateCartItemQuantityCommand(
                         cartId,
@@ -98,7 +98,7 @@ public class CartController {
             @RequestHeader("X-External-Id") String externalId,
             @PathVariable UUID cartId,
             @PathVariable UUID productId) {
-        UserDto user = userClient.getUserByExternalId(externalId);
+        UserDto user = userPort.getUserByExternalId(externalId);
         RemoveCartItemCommand command = new RemoveCartItemCommand(cartId, user.id(), productId);
         commandBus.send(command);
         return ResponseEntity.noContent().build();

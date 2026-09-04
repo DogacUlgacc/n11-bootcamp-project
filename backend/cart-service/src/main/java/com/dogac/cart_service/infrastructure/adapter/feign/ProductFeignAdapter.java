@@ -1,4 +1,4 @@
-package com.dogac.cart_service.infrastructure.adapter;
+package com.dogac.cart_service.infrastructure.adapter.feign;
 
 import java.util.UUID;
 
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.dogac.cart_service.application.dto.feignDto.Currency;
 import com.dogac.cart_service.application.dto.feignDto.ProductDto;
 import com.dogac.cart_service.application.port.ProductPort;
-import com.dogac.cart_service.infrastructure.resilience.ProductRetryService;
+import com.dogac.cart_service.infrastructure.resilience.product.ProductRetryService;
 
 @Component
 public class ProductFeignAdapter implements ProductPort {

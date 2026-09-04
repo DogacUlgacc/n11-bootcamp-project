@@ -23,4 +23,9 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
     }
+
+    @ExceptionHandler(feign.RetryableException.class)
+    public ResponseEntity<String> handleServiceUnavailable(feign.RetryableException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("User service is currently unavailable");
+    }
 }

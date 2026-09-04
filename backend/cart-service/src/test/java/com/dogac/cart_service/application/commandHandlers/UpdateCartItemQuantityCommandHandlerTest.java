@@ -52,7 +52,7 @@ class UpdateCartItemQuantityCommandHandlerTest {
                 userId,
                 productId,
                 5);
-        when(cartRepository.findByIdAndUserId(CartId.from(command.cartId()), UserId.from(command.userId())))
+        when(cartRepository.findById(CartId.from(command.cartId())))
                 .thenReturn(Optional.of(cart));
 
         CartResponse response = handler.handle(command);

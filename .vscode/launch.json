@@ -62,6 +62,27 @@
       "mainClass": "com.dogac.cart_service.CartServiceApplication",
       "projectName": "cart-service",
       "args": "",
+      "envFile": "${workspaceFolder}/.env",
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=62955 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=cart-service"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-OrderServiceApplication<order-service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.dogac.order_service.OrderServiceApplication",
+      "projectName": "order-service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-PaymentServiceApplication<payment-service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.dogac.payment_service.PaymentServiceApplication",
+      "projectName": "payment-service",
+      "args": "",
       "envFile": "${workspaceFolder}/.env"
     }
   ]

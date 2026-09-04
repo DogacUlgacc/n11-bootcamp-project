@@ -24,3 +24,58 @@ spring:
       properties:
         spring.json.trusted.packages: "com.dogac.common_events.event,com.dogac.common_events.enums"
         spring.json.use.type.headers: true
+
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        ignoreExceptions:
+          - feign.FeignException.NotFound
+
+      cartService:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        ignoreExceptions:
+          - feign.FeignException.NotFound
+
+  retry:
+    instances:
+      userService:
+        maxAttempts: 3
+        waitDuration: 500ms
+        retryExceptions:
+          - feign.RetryableException
+          - java.io.IOException
+          - java.net.SocketTimeoutException
+          - feign.FeignException.ServiceUnavailable
+        ignoreExceptions:
+          - feign.FeignException.NotFound
+
+      cartService:
+        maxAttempts: 3
+        waitDuration: 500ms
+        retryExceptions:
+          - feign.RetryableException
+          - java.io.IOException
+          - java.net.SocketTimeoutException
+          - feign.FeignException.ServiceUnavailable
+        ignoreExceptions:
+          - feign.FeignException.NotFound
+
+  timelimiter:
+    instances:
+      userService:
+        timeoutDuration: 3s
+
+      cartService:
+        timeoutDuration: 3s

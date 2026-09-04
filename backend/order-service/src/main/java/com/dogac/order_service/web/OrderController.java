@@ -26,9 +26,9 @@ import com.dogac.order_service.application.dto.OrderResponse;
 import com.dogac.order_service.application.dto.UpdateOrderRequest;
 import com.dogac.order_service.application.dto.UpdatedOrderResponse;
 import com.dogac.order_service.application.feignDto.UserDto;
+import com.dogac.order_service.application.port.UserPort;
 import com.dogac.order_service.application.queries.GetAllOrdersQuery;
 import com.dogac.order_service.application.queries.GetOrderByIdQuery;
-import com.dogac.order_service.infrastructure.feignclients.UserClient;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -39,12 +39,12 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderController {
     private final CommandBus commandBus;
     private final QueryBus queryBus;
-    private final UserClient userClient;
+    private final UserPort userPort;
 
-    public OrderController(CommandBus commandBus, QueryBus queryBus, UserClient userClient) {
+    public OrderController(CommandBus commandBus, QueryBus queryBus, UserPort userPort) {
         this.commandBus = commandBus;
         this.queryBus = queryBus;
-        this.userClient = userClient;
+        this.userPort = userPort;
     }
 
     /* manuel post order method */
@@ -59,10 +59,8 @@ public class OrderController {
             @RequestHeader("X-External-Id") String externalId,
             @RequestBody @Valid CreateCheckoutCommand request) {
 
-        log.info("ExternalId: " + externalId);
-        log.info("CartId: " + request.cartId());
-        UserDto user = userClient.getUserByExternalId(externalId);
-        log.info("UserId: " + user.id());
+        UserDto user = userPort.getUserByExternalId(externalId);
+
         CreateCheckoutCommand command = new CreateCheckoutCommand(
                 user.id(),
                 request.cartId());
