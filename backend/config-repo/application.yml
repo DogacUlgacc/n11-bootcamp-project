@@ -8,3 +8,9 @@ eureka:
 spring:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
