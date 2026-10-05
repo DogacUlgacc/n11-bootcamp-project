@@ -17,4 +17,4 @@ management:
   metrics:
     distribution:
       percentiles-histogram:
-        http.server.requests: tr
+        http.server.requests: true
