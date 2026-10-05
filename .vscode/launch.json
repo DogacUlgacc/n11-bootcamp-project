@@ -84,6 +84,16 @@
       "projectName": "payment-service",
       "args": "",
       "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-Main<common-events>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.dogac.Main",
+      "projectName": "common-events",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }

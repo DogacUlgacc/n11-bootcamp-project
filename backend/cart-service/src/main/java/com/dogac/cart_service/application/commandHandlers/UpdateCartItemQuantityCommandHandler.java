@@ -24,57 +24,58 @@ import com.dogac.common_events.event.CartItemQuantityUpdatedEvent;
 
 @Component
 public class UpdateCartItemQuantityCommandHandler
-        implements CommandHandler<UpdateCartItemQuantityCommand, CartResponse> {
+                implements CommandHandler<UpdateCartItemQuantityCommand, CartResponse> {
 
-    private final CartRepository cartRepository;
-    private final CartResponseMapper cartResponseMapper;
-    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
-    private final KafkaEventPublisher kafkaEventPublisher;
+        private final CartRepository cartRepository;
+        private final CartResponseMapper cartResponseMapper;
+        private static final Logger logger = LoggerFactory.getLogger(CartController.class);
+        private final KafkaEventPublisher kafkaEventPublisher;
 
-    public UpdateCartItemQuantityCommandHandler(CartRepository cartRepository, CartResponseMapper cartResponseMapper,
-            KafkaEventPublisher kafkaEventPublisher) {
-        this.cartRepository = cartRepository;
-        this.cartResponseMapper = cartResponseMapper;
-        this.kafkaEventPublisher = kafkaEventPublisher;
-    }
+        public UpdateCartItemQuantityCommandHandler(CartRepository cartRepository,
+                        CartResponseMapper cartResponseMapper,
+                        KafkaEventPublisher kafkaEventPublisher) {
+                this.cartRepository = cartRepository;
+                this.cartResponseMapper = cartResponseMapper;
+                this.kafkaEventPublisher = kafkaEventPublisher;
+        }
 
-    // *TODO:: Şuan keycloack olmadığı için findByIdAndUserId() yerine findById
-    // kullanıyoruz!*/
+        // *TODO:: Şuan keycloack olmadığı için findByIdAndUserId() yerine findById
+        // kullanıyoruz!*/
 
-    @Override
-    @CacheEvict(value = "cart-by-user", key = "#command.userId()")
-    public CartResponse handle(UpdateCartItemQuantityCommand command) {
-        Cart cart = cartRepository.findById(
-                CartId.from(command.cartId()))
-                .orElseThrow(() -> new CartNotFoundException("cart not found!"));
-        logger.info("buraya bak" + cart.getId());
+        @Override
+        @CacheEvict(value = "cart-by-user", key = "#command.userId()")
+        public CartResponse handle(UpdateCartItemQuantityCommand command) {
+                Cart cart = cartRepository.findById(
+                                CartId.from(command.cartId()))
+                                .orElseThrow(() -> new CartNotFoundException("cart not found!"));
+                logger.info("buraya bak" + cart.getId());
 
-        List<CartItem> list = cart.getItems();
+                List<CartItem> list = cart.getItems();
 
-        CartItem item = cart.getItems()
-                .stream()
-                .filter(i -> i.getProductId().equals(ProductId.from(command.productId())))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Cart item not found"));
+                CartItem item = cart.getItems()
+                                .stream()
+                                .filter(i -> i.getProductId().equals(ProductId.from(command.productId())))
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalStateException("Cart item not found"));
 
-        int oldQuantity = item.getQuantity().value();
-        int newQuantity = command.quantity();
+                int oldQuantity = item.getQuantity().value();
+                int newQuantity = command.quantity();
 
-        int delta = newQuantity - oldQuantity;
+                int delta = newQuantity - oldQuantity;
 
-        cart.changeItemQuantity(ProductId.from(command.productId()), new Quantity(command.quantity()));
+                cart.changeItemQuantity(ProductId.from(command.productId()), new Quantity(command.quantity()));
 
-        cartRepository.save(cart);
+                cartRepository.save(cart);
 
-        CartItemQuantityUpdatedEvent event = new CartItemQuantityUpdatedEvent(
-                cart.getId().value(),
-                item.getProductId().value(),
-                oldQuantity,
-                newQuantity,
-                delta);
-        kafkaEventPublisher.publishCartItemUpdated(event);
-        logger.info("event gitti mi ? " + event.toString());
-        return cartResponseMapper.toResponse(cart);
-    }
+                CartItemQuantityUpdatedEvent event = new CartItemQuantityUpdatedEvent(
+                                cart.getId().value(),
+                                item.getProductId().value(),
+                                oldQuantity,
+                                newQuantity,
+                                delta);
+                kafkaEventPublisher.publishCartItemUpdated(event);
+                logger.info("event gitti mi ? " + event.toString());
+                return cartResponseMapper.toResponse(cart);
+        }
 
 }

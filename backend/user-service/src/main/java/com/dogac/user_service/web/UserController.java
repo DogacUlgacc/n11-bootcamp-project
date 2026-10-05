@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dogac.logging.annotation.LogExecutionTime;
 import com.dogac.user_service.application.bus.CommandBus;
 import com.dogac.user_service.application.bus.QueryBus;
 import com.dogac.user_service.application.commands.CreateUserCommand;
@@ -45,6 +46,7 @@ public class UserController {
     }
 
     @PostMapping
+    @LogExecutionTime
     public ResponseEntity<CreatedUserResponse> createUser(
             @RequestHeader(value = "X-External-Id", required = false) String externalId,
             @RequestBody @Valid CreateUserCommand command) {
@@ -62,6 +64,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
+    @LogExecutionTime
     public ResponseEntity<RegisteredUserResponse> register(
             @RequestBody @Valid RegisterUserCommand command) {
 
@@ -71,6 +74,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @LogExecutionTime
     public ResponseEntity<UpdatedUserResponse> updateUser(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateUserRequest request) {
@@ -87,6 +91,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @LogExecutionTime
     public ResponseEntity<Void> deleteUser(
             @PathVariable UUID id) {
         commandBus.send(new DeleteUserCommand(id));
@@ -94,6 +99,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @LogExecutionTime
     public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
         GetUserByIdQuery query = new GetUserByIdQuery(id);
         UserResponse response = queryBus.execute(query);
@@ -101,12 +107,14 @@ public class UserController {
     }
 
     @GetMapping("/by-external-id/{externalId}")
+    @LogExecutionTime
     public ResponseEntity<UserIdentityResponse> getUserByExternalId(@PathVariable String externalId) {
         UserIdentityResponse response = queryBus.execute(new GetUserByExternalIdQuery(externalId));
         return ResponseEntity.ok(response);
     }
 
     @GetMapping()
+    @LogExecutionTime
     public ResponseEntity<List<UserResponse>> getUsers() {
         GetAllUsersQuery query = new GetAllUsersQuery();
         List<UserResponse> responseList = queryBus.execute(query);

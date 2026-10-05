@@ -27,6 +27,7 @@ import com.dogac.cart_service.application.dto.feignDto.UserDto;
 import com.dogac.cart_service.application.port.UserPort;
 import com.dogac.cart_service.application.queries.GetCartByIdQuery;
 import com.dogac.cart_service.application.queries.GetCartByUserIdQuery;
+import com.dogac.logging.annotation.LogExecutionTime;
 
 import jakarta.validation.Valid;
 
@@ -45,18 +46,21 @@ public class CartController {
     }
 
     @GetMapping("/user/{userId}")
+    @LogExecutionTime
     public ResponseEntity<CartResponse> getCartByUserId(@PathVariable UUID userId) {
         CartResponse response = queryBus.execute(new GetCartByUserIdQuery(userId));
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
+    @LogExecutionTime
     public ResponseEntity<CreatedCartResponse> createCart(@RequestBody @Valid CreateCartCommand command) {
         CreatedCartResponse response = commandBus.send(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/items")
+    @LogExecutionTime
     public ResponseEntity<Void> addItem(
             @RequestHeader("X-External-Id") String externalId,
             @RequestBody AddItemToCartCommand request) {
@@ -70,12 +74,14 @@ public class CartController {
     }
 
     @GetMapping("/{cartId}")
+    @LogExecutionTime
     public ResponseEntity<CartResponse> getCart(@PathVariable UUID cartId) {
         CartResponse response = queryBus.execute(new GetCartByIdQuery(cartId));
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{cartId}/items/{productId}")
+    @LogExecutionTime
     public ResponseEntity<CartResponse> updateQuantity(
             @RequestHeader("X-External-Id") String externalId,
             @PathVariable UUID cartId,
@@ -94,6 +100,7 @@ public class CartController {
     }
 
     @DeleteMapping("/{cartId}/items/{productId}")
+    @LogExecutionTime
     public ResponseEntity<Void> deleteItem(
             @RequestHeader("X-External-Id") String externalId,
             @PathVariable UUID cartId,
@@ -103,4 +110,15 @@ public class CartController {
         commandBus.send(command);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/test/error")
+    public ResponseEntity<Void> testError() {
+        throw new RuntimeException("Test 500 error");
+    }
+
+    @GetMapping("/test/success")
+    public String testSuccess() {
+        return "Success";
+    }
+
 }

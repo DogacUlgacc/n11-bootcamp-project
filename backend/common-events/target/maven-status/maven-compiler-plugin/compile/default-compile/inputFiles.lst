@@ -8,4 +8,7 @@ C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\jav
 C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\common_events\event\PaymentSucceededEvent.java
 C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\common_events\event\UserRegisteredEvent.java
 C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\common_events\exceptions\EventSerializationException.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\logging\annotation\LogExecutionTime.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\logging\aspect\LogExecutionTimeAspect.java
+C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\logging\config\LoggingAutoConfiguration.java
 C:\Users\dogac\Projects\n11\n11-demo-bootcamp\backend\common-events\src\main\java\com\dogac\Main.java
