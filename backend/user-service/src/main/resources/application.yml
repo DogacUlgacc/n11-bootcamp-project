@@ -1,7 +1,7 @@
 spring:
   application:
     name: user-service
-    
+
   data:
     redis:
       host: localhost
@@ -23,3 +23,12 @@ keycloak:
   admin-client-id: admin-cli
   admin-username: admin
   admin-password: password
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
